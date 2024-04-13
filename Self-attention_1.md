@@ -1,4 +1,4 @@
-# Self-attention
+# Self-attention 上
 1. self-attention想要解決的問題
    - 以往的input都是一個向量，輸出則可能是scalar（regression）或是class（classification)
    - 利用self-attention則可使用a set of vectors當作input，並且長度是可改變的、不一樣的
@@ -64,11 +64,40 @@
      + 根據a1，找出sequence中與a1相關的其他向量（find the relevant vectors in a sequence)
      + 每一個向量跟a1的關聯程度以alpha來表示
 ![self_v7 014](https://github.com/FionaYuY/MachineLearning2021_HungYiLee/assets/151610467/099fd755-bb19-4037-b88c-6abf52b8be86)
-     + 怎麼決定兩個向量之間的關聯性？ 有幾種不同的做法（1)dot product：將兩個向量分別呈上兩個不同的矩陣，得到q和k，將q和k做dot product，得到的scaler為alpha (2)additive：通過wq,wk
+     + 怎麼決定兩個向量之間的關聯性？ 有幾種不同的做法（1)dot product（最常用）：將兩個向量分別呈上兩個不同的矩陣，得到q和k，將q和k做dot product，得到的scaler為alpha (2)additive：通過wq,wk，得到q,k，串起來丟進activation function中，再通過transform得到alpha
 ![self_v7 015](https://github.com/FionaYuY/MachineLearning2021_HungYiLee/assets/151610467/c144ee0b-a736-4ea6-be58-15427a6aecb9)
+   - 計算alpha
+     + a1乘上wq，得到q1。q為query
+     + a2,a3,a4乘上wk，得到k。k為key
+     + 將q1,k計算inner product得到alpha
+     + alpha1,2表示query是1提供的，key是2提供的
+     + alpha為attention score
+     + ps.在實作時，q1也會跟自己算關聯性（q1,k1)，得到alpha1,1。
+![self_v7 016](https://github.com/FionaYuY/MachineLearning2021_HungYiLee/assets/151610467/52d666c9-0c8b-4945-9c6b-d9d2c0fcc655)
+   - 丟進soft-max中
+     + 此soft-max與分類時的soft-max一樣（將alpha乘上exponential，在把exponential的值加起來做normalize，得到alpha prime。
+     + 為什麼用soft-max？softmax最常見，但也不一定要用soft-max。用其他的也行．
+![self_v7 017](https://github.com/FionaYuY/MachineLearning2021_HungYiLee/assets/151610467/9971b214-c110-46f5-9f8c-4d56346bb9ed)
+   - 根據alpha prime，去抽取sequence中重要的資訊
+     + 將a1,a2...乘上wv，得到新的向量v1,v2...
+     + 將v1,v2,...乘上attention score(alpha prime)，再加起來，得到b1
+     + so, 如果某一個向量他得到的attention score越高（假設a1,a2關聯性強），alpha prime很大，那經過weighted sum所得到的b1，就有可能較接近v2
+     + 也就是說，誰的attention score越大，誰的v就會dominate你抽出來的結果
+![self_v7 018](https://github.com/FionaYuY/MachineLearning2021_HungYiLee/assets/151610467/485d8f1c-5278-4d8f-9bc8-17715dc95ac3)
 
-
-
+# self-attention 下
+1. b1~b4不需要依序產生，而是以parallel的方式，同時被計算出來的
+2. review:計算b2
+   - a2乘上一個transform，變成q2
+   - q2去對a1~a4計算attention score:
+     + q2對k做dot product得到四個分數-> normalization(ex:soft-max) -> alpha prime (經過normalization後的Attention score)
+   - 將alpha prime分別乘上v1~v4，全部相加，得到b2
+![self_v7 020](https://github.com/FionaYuY/MachineLearning2021_HungYiLee/assets/151610467/c847c83b-638e-4d9c-9b06-2fb25c0c4ef3)
+3. 從矩陣乘法的角度來看self-attention
+   - a1~a4分別產生q,k,v
+     + a乘上wq得到q
+     + 
+![self_v7 021](https://github.com/FionaYuY/MachineLearning2021_HungYiLee/assets/151610467/d3ade78c-4909-4a9c-9df4-6bc25c544598)
 
 
 
